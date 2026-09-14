@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: credit.engine
+  datasource:
+    url: ${DATASOURCE.SRMCREDIT}
+    username: ${DATASOURCE.USERNAME}
+    password: ${DATASOURCE.PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
