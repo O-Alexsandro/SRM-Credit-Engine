@@ -1,6 +1,7 @@
 package com.srm.credit.engine.settlement.service;
 
 import com.srm.credit.engine.exchange.entity.ExchangeRate;
+import com.srm.credit.engine.exchange.exception.ExchangeRateNotFoundException;
 import com.srm.credit.engine.exchange.repository.ExchangeRateRepository;
 import com.srm.credit.engine.pricing.dto.PricingRequest;
 import com.srm.credit.engine.pricing.dto.PricingResponse;
@@ -8,10 +9,12 @@ import com.srm.credit.engine.pricing.service.PricingService;
 import com.srm.credit.engine.receivable.entity.Receivable;
 import com.srm.credit.engine.receivable.enums.Currency;
 import com.srm.credit.engine.receivable.enums.ReceivableStatus;
+import com.srm.credit.engine.receivable.exception.ReceivableNotFoundException;
 import com.srm.credit.engine.receivable.repository.ReceivableRepository;
 import com.srm.credit.engine.settlement.dto.SettlementRequest;
 import com.srm.credit.engine.settlement.dto.SettlementResponse;
 import com.srm.credit.engine.settlement.entity.Settlement;
+import com.srm.credit.engine.settlement.exception.SettlementNotFoundException;
 import com.srm.credit.engine.settlement.repository.SettlementRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +50,7 @@ public class SettlementService {
         Receivable receivable = receivableRepository.findById(
                 request.receivableId()
         ).orElseThrow(() ->
-                new RuntimeException("Recebível não encontrado")
+                new ReceivableNotFoundException("Recebível não encontrado")
         );
 
         if (receivable.getStatus() == ReceivableStatus.SETTLED) {
@@ -56,7 +59,7 @@ public class SettlementService {
                     settlementRepository.findByReceivableId(
                             request.receivableId()
                     ).orElseThrow(() ->
-                            new RuntimeException(
+                            new SettlementNotFoundException(
                                     "Liquidação do recebível não encontrada"
                             )
                     );
@@ -80,7 +83,7 @@ public class SettlementService {
                     )
                     .map(ExchangeRate::getRate)
                     .orElseThrow(() ->
-                            new RuntimeException(
+                            new ExchangeRateNotFoundException(
                                     "Cotação USD/BRL não encontrada"
                             )
                     );
@@ -153,7 +156,7 @@ public class SettlementService {
 
         Settlement settlement = settlementRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Liquidação não encontrada")
+                        new SettlementNotFoundException("Liquidação não encontrada")
                 );
 
         return toResponse(settlement);

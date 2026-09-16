@@ -6,6 +6,7 @@ import com.srm.credit.engine.receivable.dto.ReceivableRequest;
 import com.srm.credit.engine.receivable.dto.ReceivableResponse;
 import com.srm.credit.engine.receivable.entity.Receivable;
 import com.srm.credit.engine.receivable.enums.ReceivableStatus;
+import com.srm.credit.engine.receivable.exception.ReceivableNotFoundException;
 import com.srm.credit.engine.receivable.repository.ReceivableRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class ReceivableService {
     public ReceivableResponse criar(ReceivableRequest request) {
 
         Cedente cedente = cedenteRepository.findById(request.cedenteId())
-                .orElseThrow(() -> new RuntimeException("Cedente não encontrado"));
+                .orElseThrow(() -> new ReceivableNotFoundException("Cedente não encontrado"));
 
         Receivable receivable = new Receivable();
 
@@ -55,7 +56,7 @@ public class ReceivableService {
     public ReceivableResponse buscarPorId(Long id) {
 
         Receivable receivable = receivableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recebível não encontrado"));
+                .orElseThrow(() -> new ReceivableNotFoundException("Recebível não encontrado"));
 
         return toResponse(receivable);
     }
