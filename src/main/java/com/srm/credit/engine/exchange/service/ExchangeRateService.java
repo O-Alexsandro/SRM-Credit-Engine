@@ -3,6 +3,7 @@ package com.srm.credit.engine.exchange.service;
 import com.srm.credit.engine.exchange.dto.ExchangeRateRequest;
 import com.srm.credit.engine.exchange.dto.ExchangeRateResponse;
 import com.srm.credit.engine.exchange.entity.ExchangeRate;
+import com.srm.credit.engine.exchange.exception.ExchangeRateNotFoundException;
 import com.srm.credit.engine.exchange.repository.ExchangeRateRepository;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,7 @@ public class ExchangeRateService {
 
     public ExchangeRateResponse buscarPorId(Long id) {
         ExchangeRate exchangeRate = exchangeRateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cotação não encontrada"));
+                .orElseThrow(() -> new ExchangeRateNotFoundException("Cotação não encontrada"));
 
         return toResponse(exchangeRate);
     }

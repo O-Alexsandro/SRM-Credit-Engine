@@ -1,6 +1,7 @@
 package com.srm.credit.engine.cedente.service;
 
 import com.srm.credit.engine.cedente.entity.Cedente;
+import com.srm.credit.engine.cedente.exception.CedenteNotFoundException;
 import com.srm.credit.engine.cedente.repository.CedenteRepository;
 import com.srm.credit.engine.cedente.dto.CedenteRequest;
 import com.srm.credit.engine.cedente.dto.CedenteResponse;
@@ -40,7 +41,7 @@ public class CedenteService {
     public CedenteResponse buscarPorId(Long id) {
 
         Cedente cedente = cedenteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cedente não encontrado"));
+                .orElseThrow(() -> new CedenteNotFoundException("Cedente não encontrado"));
 
         return toResponse(cedente);
     }
