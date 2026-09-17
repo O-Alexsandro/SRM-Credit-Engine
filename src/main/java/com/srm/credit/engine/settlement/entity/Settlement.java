@@ -28,6 +28,9 @@ public class Settlement {
     @Column(nullable = false, precision = 19, scale = 6)
     private BigDecimal amount;
 
+    @Column(name = "present_value_brl", precision = 19, scale = 6)
+    private BigDecimal presentValueBrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Currency currency;

@@ -47,7 +47,10 @@ class SettlementControllerTest {
         SettlementResponse response = new SettlementResponse(
                 1L,
                 1L,
+                new BigDecimal("100000.00"),
                 new BigDecimal("92859.94"),
+                new BigDecimal("92859.94"),
+                new BigDecimal("7140.06"),
                 Currency.BRL,
                 null,
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -62,7 +65,10 @@ class SettlementControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.receivableId").value(1))
+                .andExpect(jsonPath("$.faceValue").value(100000.00))
+                .andExpect(jsonPath("$.presentValueBrl").value(92859.94))
                 .andExpect(jsonPath("$.amount").value(92859.94))
+                .andExpect(jsonPath("$.discount").value(7140.06))
                 .andExpect(jsonPath("$.currency").value("BRL"));
     }
 
@@ -104,7 +110,10 @@ class SettlementControllerTest {
         SettlementResponse settlement = new SettlementResponse(
                 1L,
                 1L,
+                new BigDecimal("100000.00"),
                 new BigDecimal("92859.94"),
+                new BigDecimal("92859.94"),
+                new BigDecimal("7140.06"),
                 Currency.BRL,
                 null,
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -121,7 +130,10 @@ class SettlementControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].receivableId").value(1))
+                .andExpect(jsonPath("$[0].faceValue").value(100000.00))
+                .andExpect(jsonPath("$[0].presentValueBrl").value(92859.94))
                 .andExpect(jsonPath("$[0].amount").value(92859.94))
+                .andExpect(jsonPath("$[0].discount").value(7140.06))
                 .andExpect(jsonPath("$[0].currency").value("BRL"));
     }
 
@@ -131,7 +143,10 @@ class SettlementControllerTest {
         SettlementResponse settlement = new SettlementResponse(
                 1L,
                 1L,
+                new BigDecimal("100000.00"),
                 new BigDecimal("92859.94"),
+                new BigDecimal("92859.94"),
+                new BigDecimal("7140.06"),
                 Currency.BRL,
                 null,
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -168,7 +183,10 @@ class SettlementControllerTest {
         SettlementResponse settlement = new SettlementResponse(
                 1L,
                 1L,
+                new BigDecimal("100000.00"),
                 new BigDecimal("92859.94"),
+                new BigDecimal("92859.94"),
+                new BigDecimal("7140.06"),
                 Currency.BRL,
                 null,
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -181,7 +199,10 @@ class SettlementControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.receivableId").value(1))
+                .andExpect(jsonPath("$.faceValue").value(100000.00))
+                .andExpect(jsonPath("$.presentValueBrl").value(92859.94))
                 .andExpect(jsonPath("$.amount").value(92859.94))
+                .andExpect(jsonPath("$.discount").value(7140.06))
                 .andExpect(jsonPath("$.currency").value("BRL"));
     }
 }
