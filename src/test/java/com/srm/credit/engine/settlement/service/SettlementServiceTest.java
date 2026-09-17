@@ -15,6 +15,7 @@ import com.srm.credit.engine.settlement.entity.Settlement;
 import com.srm.credit.engine.settlement.repository.SettlementRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,13 +61,15 @@ class SettlementServiceTest {
                 new BigDecimal("100000.00"),
                 3,
                 Currency.BRL,
-                new BigDecimal("92859.94")
+                new BigDecimal("92859.94"),
+                new BigDecimal("7140.06")
         );
 
         Settlement savedSettlement = new Settlement();
         savedSettlement.setId(10L);
         savedSettlement.setReceivable(receivable);
         savedSettlement.setAmount(new BigDecimal("92859.94"));
+        savedSettlement.setPresentValueBrl(new BigDecimal("92859.94"));
         savedSettlement.setCurrency(Currency.BRL);
         savedSettlement.setSettledAt(LocalDateTime.now());
 
@@ -88,10 +91,24 @@ class SettlementServiceTest {
 
         assertEquals(10L, response.id());
         assertEquals(1L, response.receivableId());
+        assertEquals(new BigDecimal("100000.00"), response.faceValue());
+        assertEquals(new BigDecimal("92859.94"), response.presentValueBrl());
         assertEquals(new BigDecimal("92859.94"), response.amount());
+        assertEquals(new BigDecimal("7140.06"), response.discount());
         assertEquals(Currency.BRL, response.currency());
 
-        verify(settlementRepository).save(any(Settlement.class));
+        ArgumentCaptor<Settlement> settlementCaptor =
+                ArgumentCaptor.forClass(Settlement.class);
+
+        verify(settlementRepository).save(settlementCaptor.capture());
+
+        Settlement settlement = settlementCaptor.getValue();
+
+        assertEquals(
+                new BigDecimal("92859.94"),
+                settlement.getPresentValueBrl()
+        );
+
         verify(receivableRepository).save(receivable);
 
         assertEquals(
@@ -137,6 +154,7 @@ class SettlementServiceTest {
         existingSettlement.setId(10L);
         existingSettlement.setReceivable(receivable);
         existingSettlement.setAmount(new BigDecimal("92859.94"));
+        existingSettlement.setPresentValueBrl(new BigDecimal("92859.94"));
         existingSettlement.setCurrency(Currency.BRL);
         existingSettlement.setSettledAt(LocalDateTime.now());
 
@@ -155,7 +173,10 @@ class SettlementServiceTest {
 
         assertEquals(10L, response.id());
         assertEquals(1L, response.receivableId());
+        assertEquals(new BigDecimal("100000.00"), response.faceValue());
+        assertEquals(new BigDecimal("92859.94"), response.presentValueBrl());
         assertEquals(new BigDecimal("92859.94"), response.amount());
+        assertEquals(new BigDecimal("7140.06"), response.discount());
         assertEquals(Currency.BRL, response.currency());
 
         verify(settlementRepository, never()).save(any());
@@ -222,18 +243,29 @@ class SettlementServiceTest {
                 LocalDateTime.of(2026, 9, 14, 16, 0)
         );
 
-        PricingResponse pricingResponse = new PricingResponse(
+        PricingResponse brlPricingResponse = new PricingResponse(
+                ReceivableType.DUPLICATA_MERCANTIL,
+                new BigDecimal("100000.00"),
+                3,
+                Currency.BRL,
+                new BigDecimal("92859.94"),
+                new BigDecimal("7140.06")
+        );
+
+        PricingResponse usdPricingResponse = new PricingResponse(
                 ReceivableType.DUPLICATA_MERCANTIL,
                 new BigDecimal("100000.00"),
                 3,
                 Currency.USD,
-                new BigDecimal("17094.67")
+                new BigDecimal("17094.67"),
+                new BigDecimal("7140.06")
         );
 
         Settlement savedSettlement = new Settlement();
         savedSettlement.setId(20L);
         savedSettlement.setReceivable(receivable);
         savedSettlement.setAmount(new BigDecimal("17094.67"));
+        savedSettlement.setPresentValueBrl(new BigDecimal("92859.94"));
         savedSettlement.setCurrency(Currency.USD);
         savedSettlement.setFxRateUsed(new BigDecimal("5.4321"));
         savedSettlement.setSettledAt(LocalDateTime.now());
@@ -245,7 +277,8 @@ class SettlementServiceTest {
                 .thenReturn(List.of(olderRate, latestRate));
 
         when(pricingService.calculate(any()))
-                .thenReturn(pricingResponse);
+                .thenReturn(brlPricingResponse)
+                .thenReturn(usdPricingResponse);
 
         when(settlementRepository.save(any(Settlement.class)))
                 .thenReturn(savedSettlement);
@@ -258,14 +291,28 @@ class SettlementServiceTest {
         SettlementResponse response = service.settle(request);
 
         assertEquals(20L, response.id());
+        assertEquals(new BigDecimal("100000.00"), response.faceValue());
+        assertEquals(new BigDecimal("92859.94"), response.presentValueBrl());
         assertEquals(new BigDecimal("17094.67"), response.amount());
+        assertEquals(new BigDecimal("7140.06"), response.discount());
         assertEquals(Currency.USD, response.currency());
         assertEquals(
                 new BigDecimal("5.4321"),
                 response.fxRateUsed()
         );
 
-        verify(settlementRepository).save(any(Settlement.class));
+        ArgumentCaptor<Settlement> settlementCaptor =
+                ArgumentCaptor.forClass(Settlement.class);
+
+        verify(settlementRepository).save(settlementCaptor.capture());
+
+        Settlement settlement = settlementCaptor.getValue();
+
+        assertEquals(
+                new BigDecimal("92859.94"),
+                settlement.getPresentValueBrl()
+        );
+
         verify(receivableRepository).save(receivable);
     }
 
@@ -281,6 +328,7 @@ class SettlementServiceTest {
         settlement.setId(10L);
         settlement.setReceivable(receivable);
         settlement.setAmount(new BigDecimal("92859.94"));
+        settlement.setPresentValueBrl(new BigDecimal("92859.94"));
         settlement.setCurrency(Currency.BRL);
         settlement.setSettledAt(LocalDateTime.now());
 
@@ -291,7 +339,10 @@ class SettlementServiceTest {
 
         assertEquals(10L, response.id());
         assertEquals(1L, response.receivableId());
+        assertEquals(new BigDecimal("100000.00"), response.faceValue());
+        assertEquals(new BigDecimal("92859.94"), response.presentValueBrl());
         assertEquals(new BigDecimal("92859.94"), response.amount());
+        assertEquals(new BigDecimal("7140.06"), response.discount());
         assertEquals(Currency.BRL, response.currency());
     }
 
@@ -324,6 +375,7 @@ class SettlementServiceTest {
         settlement.setId(10L);
         settlement.setReceivable(receivable);
         settlement.setAmount(new BigDecimal("92859.94"));
+        settlement.setPresentValueBrl(new BigDecimal("92859.94"));
         settlement.setCurrency(Currency.BRL);
         settlement.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -358,6 +410,7 @@ class SettlementServiceTest {
         brlSettlement.setId(10L);
         brlSettlement.setReceivable(receivable);
         brlSettlement.setAmount(new BigDecimal("92859.94"));
+        brlSettlement.setPresentValueBrl(new BigDecimal("92859.94"));
         brlSettlement.setCurrency(Currency.BRL);
         brlSettlement.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -367,6 +420,7 @@ class SettlementServiceTest {
         usdSettlement.setId(20L);
         usdSettlement.setReceivable(receivable);
         usdSettlement.setAmount(new BigDecimal("17094.67"));
+        usdSettlement.setPresentValueBrl(new BigDecimal("92859.94"));
         usdSettlement.setCurrency(Currency.USD);
         usdSettlement.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 11, 0)
@@ -415,6 +469,7 @@ class SettlementServiceTest {
         settlement1.setId(10L);
         settlement1.setReceivable(receivableCedente1);
         settlement1.setAmount(new BigDecimal("92859.94"));
+        settlement1.setPresentValueBrl(new BigDecimal("92859.94"));
         settlement1.setCurrency(Currency.BRL);
         settlement1.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -424,6 +479,7 @@ class SettlementServiceTest {
         settlement2.setId(20L);
         settlement2.setReceivable(receivableCedente2);
         settlement2.setAmount(new BigDecimal("50000.00"));
+        settlement2.setPresentValueBrl(new BigDecimal("50000.00"));
         settlement2.setCurrency(Currency.BRL);
         settlement2.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 11, 0)
@@ -456,6 +512,7 @@ class SettlementServiceTest {
         settlementDentroPeriodo.setId(10L);
         settlementDentroPeriodo.setReceivable(receivable);
         settlementDentroPeriodo.setAmount(new BigDecimal("92859.94"));
+        settlementDentroPeriodo.setPresentValueBrl(new BigDecimal("92859.94"));
         settlementDentroPeriodo.setCurrency(Currency.BRL);
         settlementDentroPeriodo.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -465,6 +522,7 @@ class SettlementServiceTest {
         settlementForaPeriodo.setId(20L);
         settlementForaPeriodo.setReceivable(receivable);
         settlementForaPeriodo.setAmount(new BigDecimal("50000.00"));
+        settlementForaPeriodo.setPresentValueBrl(new BigDecimal("50000.00"));
         settlementForaPeriodo.setCurrency(Currency.BRL);
         settlementForaPeriodo.setSettledAt(
                 LocalDateTime.of(2026, 9, 15, 10, 0)
@@ -523,6 +581,7 @@ class SettlementServiceTest {
         settlementValido.setId(10L);
         settlementValido.setReceivable(receivableCedente1);
         settlementValido.setAmount(new BigDecimal("92859.94"));
+        settlementValido.setPresentValueBrl(new BigDecimal("92859.94"));
         settlementValido.setCurrency(Currency.BRL);
         settlementValido.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -532,6 +591,7 @@ class SettlementServiceTest {
         settlementMoedaErrada.setId(20L);
         settlementMoedaErrada.setReceivable(receivableCedente1);
         settlementMoedaErrada.setAmount(new BigDecimal("17094.67"));
+        settlementMoedaErrada.setPresentValueBrl(new BigDecimal("92859.94"));
         settlementMoedaErrada.setCurrency(Currency.USD);
         settlementMoedaErrada.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -541,6 +601,7 @@ class SettlementServiceTest {
         settlementCedenteErrado.setId(30L);
         settlementCedenteErrado.setReceivable(receivableCedente2);
         settlementCedenteErrado.setAmount(new BigDecimal("92859.94"));
+        settlementCedenteErrado.setPresentValueBrl(new BigDecimal("92859.94"));
         settlementCedenteErrado.setCurrency(Currency.BRL);
         settlementCedenteErrado.setSettledAt(
                 LocalDateTime.of(2026, 9, 16, 10, 0)
@@ -550,6 +611,7 @@ class SettlementServiceTest {
         settlementForaPeriodo.setId(40L);
         settlementForaPeriodo.setReceivable(receivableCedente1);
         settlementForaPeriodo.setAmount(new BigDecimal("92859.94"));
+        settlementForaPeriodo.setPresentValueBrl(new BigDecimal("92859.94"));
         settlementForaPeriodo.setCurrency(Currency.BRL);
         settlementForaPeriodo.setSettledAt(
                 LocalDateTime.of(2026, 9, 15, 10, 0)

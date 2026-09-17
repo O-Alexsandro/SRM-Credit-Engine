@@ -10,5 +10,6 @@ public record PricingResponse(
         BigDecimal faceValue,
         Integer term,
         Currency paymentCurrency,
-        BigDecimal presentValue
+        BigDecimal presentValue,
+        BigDecimal discount
 ) {}

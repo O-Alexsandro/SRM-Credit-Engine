@@ -37,6 +37,11 @@ class PricingServiceTest {
                 new BigDecimal("92859.94"),
                 response.presentValue()
         );
+
+        assertEquals(
+                new BigDecimal("7140.06"),
+                response.discount()
+        );
     }
 
     @Test
@@ -56,6 +61,11 @@ class PricingServiceTest {
                 new BigDecimal("23337.77"),
                 response.presentValue()
         );
+
+        assertEquals(
+                new BigDecimal("1662.23"),
+                response.discount()
+        );
     }
 
     @Test
@@ -74,6 +84,11 @@ class PricingServiceTest {
         assertEquals(
                 new BigDecimal("17094.67"),
                 response.presentValue()
+        );
+
+        assertEquals(
+                new BigDecimal("7140.06"),
+                response.discount()
         );
 
         assertEquals(
@@ -98,6 +113,11 @@ class PricingServiceTest {
         assertEquals(
                 2,
                 response.presentValue().scale()
+        );
+
+        assertEquals(
+                2,
+                response.discount().scale()
         );
     }
 }

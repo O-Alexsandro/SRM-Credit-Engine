@@ -33,13 +33,23 @@ public class PricingService {
 
         PricingStrategy strategy = getStrategy(request.type());
 
-        BigDecimal presentValue = strategy.calculate(
+        BigDecimal presentValueBrl = strategy.calculate(
                 request.faceValue(),
                 request.term()
         );
 
-        // O arredondamento em BRL acontece antes da conversão
-        presentValue = presentValue.setScale(2, RoundingMode.HALF_EVEN);
+        // Arredonda o valor presente em BRL antes da conversão
+        presentValueBrl = presentValueBrl.setScale(
+                2,
+                RoundingMode.HALF_EVEN
+        );
+
+        BigDecimal discount = request.faceValue()
+                .setScale(2, RoundingMode.HALF_EVEN)
+                .subtract(presentValueBrl)
+                .setScale(2, RoundingMode.HALF_EVEN);
+
+        BigDecimal presentValue = presentValueBrl;
 
         if (request.paymentCurrency() == Currency.USD) {
 
@@ -51,7 +61,7 @@ public class PricingService {
             }
 
             presentValue = currencyConversionService.convert(
-                    presentValue,
+                    presentValueBrl,
                     request.exchangeRate()
             );
         }
@@ -61,7 +71,8 @@ public class PricingService {
                 request.faceValue(),
                 request.term(),
                 request.paymentCurrency(),
-                presentValue
+                presentValue,
+                discount
         );
     }
 

@@ -89,6 +89,18 @@ public class SettlementService {
                     );
         }
 
+        PricingRequest brlPricingRequest = new PricingRequest(
+                receivable.getType(),
+                receivable.getFaceValue(),
+                receivable.getTerm(),
+                Currency.BRL,
+                null
+        );
+
+        PricingResponse brlPricingResponse = pricingService.calculate(
+                brlPricingRequest
+        );
+
         PricingRequest pricingRequest = new PricingRequest(
                 receivable.getType(),
                 receivable.getFaceValue(),
@@ -105,6 +117,7 @@ public class SettlementService {
 
         settlement.setReceivable(receivable);
         settlement.setAmount(pricingResponse.presentValue());
+        settlement.setPresentValueBrl(brlPricingResponse.presentValue());
         settlement.setCurrency(request.currency());
         settlement.setFxRateUsed(exchangeRate);
         settlement.setSettledAt(LocalDateTime.now());
@@ -163,10 +176,26 @@ public class SettlementService {
     }
 
     private SettlementResponse toResponse(Settlement settlement) {
+
+        BigDecimal faceValue =
+                settlement.getReceivable().getFaceValue()
+                        .setScale(2, RoundingMode.HALF_EVEN);
+
+        BigDecimal presentValueBrl =
+                settlement.getPresentValueBrl()
+                        .setScale(2, RoundingMode.HALF_EVEN);
+
+        BigDecimal discount =
+                faceValue.subtract(presentValueBrl)
+                        .setScale(2, RoundingMode.HALF_EVEN);
+
         return new SettlementResponse(
                 settlement.getId(),
                 settlement.getReceivable().getId(),
+                faceValue,
+                presentValueBrl,
                 settlement.getAmount().setScale(2, RoundingMode.HALF_EVEN),
+                discount,
                 settlement.getCurrency(),
                 settlement.getFxRateUsed() != null
                         ? settlement.getFxRateUsed().setScale(4, RoundingMode.HALF_EVEN)
